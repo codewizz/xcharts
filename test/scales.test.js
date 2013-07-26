@@ -1,6 +1,11 @@
 (function () {
 
-  var scales = xChart.scales,
+  var scales = {
+      xy: xChart.getScale('xy'),
+      linear: xChart.getScale('linear'),
+      exponential: xChart.getScale('exponential'),
+      ordinal: xChart.getScale('ordinal')
+    },
     data = [
       {
         label: 'foobar',
@@ -44,12 +49,12 @@
 
   describe('Linear', function () {
     it('returns a linear scale', function () {
-      var s = scales.linear([0, 60], [0, 100], 'y');
+      var s = scales.linear(null, 'y', [0, 100], [0, 60]);
       _testLinear(s);
     });
 
     it('does not round values', function () {
-      var s = scales.linear([1.1, 2.1], [0, 100], 'x');
+      var s = scales.linear(null, 'x', [0, 100], [1.1, 2.1]);
       expect(s(1.4)).to.not.equal(s(1.1));
       expect(s(1.9)).to.not.equal(s(2.1));
     });
@@ -57,7 +62,7 @@
 
   describe('Exponential', function () {
     it('returns an exponential scale', function () {
-      var s = scales.exponential([0, 500], [0, 100], 'y');
+      var s = scales.exponential(null, 'y', [0, 100], [0, 500]);
       expect(s(10)).to.be.eql(8); // would be 2 on linear
       expect(s(100)).to.be.eql(35); // would be 20 on linear
       expect(s(400)).to.be.eql(86); // would be 80 on linear
@@ -79,6 +84,7 @@
           _height: 100
         },
         s = scales.xy(foo, data, 'ordinal', 'linear');
+
       window.a = s;
       _testOrdinal(s.x);
       _testLinear(s.y);
