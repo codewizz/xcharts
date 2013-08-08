@@ -36,7 +36,7 @@
     <h3>a D3-based library for building custom charts and graphs</h3>
   </hgroup>
 
-  <nav data-version="v0.2.0">
+  <nav data-version="v0.3.0">
     <ul>
       <li>
         <a href="/xcharts/">download</a>
@@ -1089,6 +1089,41 @@
 
     <hr>
 
+    <article id="scales" class="doc">
+      <h1>Custom Scales</h1>
+
+      <p>By default, xCharts includes four scale types: <i>ordinal</i>, <i>linear</i>, <i>time</i>, and <i>exponential</i>. However, you can create custom scale types very easily.</p>
+
+      <pre><code data-language="js">function myScale(data, axis, bounds, extents) {
+  return d3.scale.linear()
+    .domain(extents)
+    .nice()
+    .rangeRound(bounds);
+}
+xChart.setScale('scale-name', myScale);</code></pre>
+
+      <h2>Arguments</h2>
+      <dl>
+        <dt><var>data</var></dt>
+        <dd><code data-language="js">object</code></dd>
+        <dd>Merged set of all data that will be displayed on the chart.</dd>
+
+        <dt><var>axis</var></dt>
+        <dd><code data-language="js">string</code></dd>
+        <dd>Either <samp>x</samp> or <samp>y</samp>.</dd>
+
+        <dt><var>bounds</var></dt>
+        <dd><code data-language="js">array</code></dd>
+        <dd>Min and max screen position values for the given axis.</dd>
+
+        <dt><var>extents</var></dt>
+        <dd><code data-language="js">array</code></dd>
+        <dd>Min and max values for the <var>data</var>.</dd>
+      </dl>
+    </article>
+
+    <hr>
+
     <article id="styles" class="doc">
       <h1>Styling Your Chart</h1>
 
@@ -1481,6 +1516,9 @@ xChart.setVis('myvis', myVis);</code></pre>
           <li><a href="#opt-interpolation">interpolation</a></li>
         
         </ol>
+      </li>
+      <li>
+        <a href="#scales">Custom Scales</a>
       </li>
       <li>
         <a href="#styles">Styling Your Chart</a>

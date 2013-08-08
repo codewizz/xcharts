@@ -1,5 +1,5 @@
 /*!
-xCharts v0.2.0 Copyright (c) 2012, tenXer, Inc. All Rights Reserved.
+xCharts v0.3.0 Copyright (c) 2012, tenXer, Inc. All Rights Reserved.
 @license MIT license. http://github.com/tenXer/xcharts for details
 */
 
@@ -40,34 +40,33 @@ function _getDomain(data, axis) {
     .sort(d3.ascending);
 }
 
-function ordinal(data, axis, bounds, spacing) {
-  spacing = spacing || defaultSpacing;
+_scales.ordinal = function (data, axis, bounds, extents) {
   var domain = _getDomain(data, axis);
   return d3.scale.ordinal()
     .domain(domain)
-    .rangeRoundBands(bounds, spacing);
-}
+    .rangeRoundBands(bounds, defaultSpacing);
+};
 
-function linear(extents, bounds, axis) {
+_scales.linear = function (data, axis, bounds, extents) {
   return d3.scale.linear()
     .domain(extents)
     .nice()
     .rangeRound(bounds);
-}
+};
 
-function exponential(extents, bounds, axis) {
+_scales.exponential = function (data, axis, bounds, extents) {
   return d3.scale.pow()
     .exponent(0.65)
     .domain(extents)
     .nice()
     .rangeRound(bounds);
-}
+};
 
-function time(extents, bounds) {
+_scales.time = function (data, axis, bounds, extents) {
   return d3.time.scale()
     .domain(_.map(extents, function (d) { return new Date(d); }))
     .range(bounds);
-}
+};
 
 function _extendDomain(domain, axis) {
   var min = domain[0],
@@ -126,7 +125,7 @@ function _getExtents(options, data, xType, yType) {
   return extents;
 }
 
-function xy(self, data, xType, yType) {
+_scales.xy = function (self, data, xType, yType) {
   var o = self._options,
     extents = _getExtents(o, data, xType, yType),
     scales = {},
@@ -137,32 +136,12 @@ function xy(self, data, xType, yType) {
 
   _.each([xType, yType], function (type, i) {
     var axis = (i === 0) ? 'x' : 'y',
-      bounds = (i === 0) ? horiz : vert;
-    switch (type) {
-    case 'ordinal':
-      scales[axis] = ordinal(data, axis, bounds);
-      break;
-    case 'linear':
-      scales[axis] = linear(extents[axis], bounds, axis);
-      break;
-    case 'exponential':
-      scales[axis] = exponential(extents[axis], bounds, axis);
-      break;
-    case 'time':
-      scales[axis] = time(extents[axis], bounds);
-      break;
-    }
+      bounds = (i === 0) ? horiz : vert,
+      fn = xChart.getScale(type);
+    scales[axis] = fn(data, axis, bounds, extents[axis]);
   });
 
   return scales;
-}
-
-var _scales = {
-  ordinal: ordinal,
-  linear: linear,
-  exponential: exponential,
-  time: time,
-  xy: xy
 };
 (function () {
   var zIndex = 2,
@@ -579,7 +558,6 @@ function svgEnabled() {
  *    var data = {
  *        "main": [
  *          {
- *            "label": "Foo",
  *            "data": [
  *              {
  *                "x": "2012-08-09T07:00:00.522Z",
@@ -601,7 +579,6 @@ function svgEnabled() {
  *        "yScale": "linear",
  *        "comp": [
  *          {
- *            "label": "Foo Target",
  *            "data": [
  *              {
  *                "x": "2012-08-09T07:00:00.522Z",
@@ -685,8 +662,22 @@ xChart.getVis = function (type) {
   return _.clone(_vis[type]);
 };
 
+xChart.setScale = function (name, fn) {
+  if (_scales.hasOwnProperty(name)) {
+    throw 'Scale type "' + name + '" already exists.';
+  }
+
+  _scales[name] = fn;
+};
+
+xChart.getScale = function (name) {
+  if (!_scales.hasOwnProperty(name)) {
+    throw 'Scale type "' + name + '" does not exist.';
+  }
+  return _scales[name];
+};
+
 xChart.visutils = _visutils;
-xChart.scales = _scales;
 
 _.defaults(xChart.prototype, {
   /**
